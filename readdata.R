@@ -1,11 +1,21 @@
 require(tidyverse)
 require(reshape2)
+require(httr)
 
 downloadDir<- "./data/raw_data"
 dataDir    <- "./data/derived_data"
 
-#read in downloaded data file
-dats<-read_csv(file.path(downloadDir,"NV_B_All_OD_Geo_view.csv"))
+# downloaded and read data
+wfs_bwk <- "https://opengeodata.wmr.wur.nl/geoserver/wfs"
+url <- parse_url(wfs_bwk)
+url$query <- list(service = "wfs",
+                  version = "2.0.0",
+                  request = "GetFeature",
+                  typename = "IHM:NV_B_All_OD_Geo_view",
+                  outputFormat = "CSV")
+request <- build_url(url)
+
+dats<-read_csv(request)
 
 # remove non-informative columns that have only one value over all rows
 nuni<-vector(length=ncol(dats))
